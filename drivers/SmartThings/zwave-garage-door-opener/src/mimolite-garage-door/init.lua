@@ -29,6 +29,8 @@ local SensorBinary = (require "st.zwave.CommandClass.SensorBinary")({ version = 
 local SwitchBinary = (require "st.zwave.CommandClass.SwitchBinary")({ version = 2 })
 
 local MIMOLITE_GARAGE_DOOR_FINGERPRINTS = {
+  --Removed productId to work with additional mimolite devices
+  --{ manufacturerId = 0x0084, productType = 0x0453, productId = 0x0111 } -- mimolite garage door
   { manufacturerId = 0x0084, productType = 0x0453, productId = 0x0111 } -- mimolite garage door
 }
 
@@ -79,7 +81,9 @@ local function open(driver, device, command)
 end
 
 local function close(driver, device, command)
-  device:send(Basic:Set({ value = 0x00 }))
+  --Changed to 0xFF - 0x00 turns off switch, but will not turn on momentary switch as is needed for garage doors
+  --device:send(Basic:Set({ value = 0x00 }))
+  device:send(Basic:Set({ value = 0xFF }))
   device.thread:call_with_delay(constants.DEFAULT_GET_STATUS_DELAY, function(d)
     device:send(Basic:Get({}))
   end)
